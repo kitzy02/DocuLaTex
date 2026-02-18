@@ -1,16 +1,35 @@
-# Compiled class file
+# ==========================================
+# IDE & Environment (Local Only)
+# ==========================================
+.vscode/
+.history/
+*.code-workspace
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# ==========================================
+# Java / Maven (Backend)
+# ==========================================
+# Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
 
-# BlueJ files
-*.ctxt
+# Build directory
+backend/target/
+target/
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# Virtual machine crash logs
+hs_err_pid*
+replay_pid*
 
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -19,15 +38,26 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# BlueJ/Mobile Tools
+*.ctxt
+.mtj.tmp/
 
-.vscode/
-.vscode\settings.json
-*.code-workspace
-.history/
+# ==========================================
+# React / Node (Frontend)
+# ==========================================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
 
-backend/target/
+# Environment Secrets (DO NOT COMMIT)
 frontend/.env
 frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# ==========================================
+# OS Generated Files
+# ==========================================
+.DS_Store
+Thumbs.db
