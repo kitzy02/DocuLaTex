@@ -12,7 +12,7 @@ import java.io.InputStream;
 @Component
 public class PdfDocumentParser implements DocumentParser {
 
-    private static final long MAX_SIZE = 5 * 1024 * 1024; // 5MB Limit
+    private static final long MAX_SIZE = 5L * 1024 * 1024; // 5MB Limit
 
     @Override
     public DocumentContent parse(InputStream inputStream) throws Exception {
