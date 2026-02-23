@@ -6,6 +6,7 @@ import com.doculatex.backend.service.DocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,16 +30,19 @@ public class DocumentController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
         }
     )
-    @PostMapping("/upload")
+    @PostMapping(
+            value = "/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<LatexResponse> uploadDocument(
-            @RequestParam("file") MultipartFile file) {
+            @RequestPart("file") MultipartFile file) {
 
         // 1️⃣ Call service
         DocumentContent content = documentService.parseDocument(file);
 
         // 2️⃣ Convert to DTO
         LatexResponse response = new LatexResponse(
-                content.toString(), // Replace later with real LaTeX generator
+                content.toString(),   // Later replace with real LaTeX generator
                 file.getOriginalFilename(),
                 LocalDateTime.now(),
                 "Document parsed successfully"
