@@ -1,5 +1,6 @@
 package com.doculatex.backend.parser;
 
+import com.doculatex.backend.exception.DocumentParsingException;
 import com.doculatex.backend.model.DocumentContent;
 import com.doculatex.backend.model.DocumentSection;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -20,20 +21,15 @@ class PdfDocumentParserTest {
 
     @Test
     void shouldParseValidPdf() throws Exception {
-
         PDDocument document = new PDDocument();
         PDPage page = new PDPage();
         document.addPage(page);
 
-        PDPageContentStream contentStream =
-                new PDPageContentStream(document, page);
-
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 12);
         contentStream.newLineAtOffset(100, 700);
         contentStream.showText("Paragraph One");
-        contentStream.newLineAtOffset(0, -20);
-        contentStream.showText("Paragraph Two");
         contentStream.endText();
         contentStream.close();
 
@@ -41,16 +37,28 @@ class PdfDocumentParserTest {
         document.save(out);
         document.close();
 
-        InputStream inputStream =
-                new ByteArrayInputStream(out.toByteArray());
+        InputStream inputStream = new ByteArrayInputStream(out.toByteArray());
 
         DocumentContent result = parser.parse(inputStream);
 
         assertNotNull(result);
         assertEquals("Parsed PDF", result.getTitle());
         assertEquals(1, result.getSections().size());
+        assertFalse(result.getSections().get(0).getContentBlocks().isEmpty());
+    }
 
-        DocumentSection section = result.getSections().get(0);
-        assertFalse(section.getContentBlocks().isEmpty());
+    @Test
+    void shouldThrowExceptionWhenPdfExceedsMaxSize() {
+        // Create a fake stream that is exactly 5MB + 1 byte
+        byte[] largeData = new byte[(5 * 1024 * 1024) + 1];
+        InputStream inputStream = new ByteArrayInputStream(largeData);
+
+        // Verify that the parser throws our custom exception
+        DocumentParsingException exception = assertThrows(
+            DocumentParsingException.class, 
+            () -> parser.parse(inputStream)
+        );
+
+        assertTrue(exception.getMessage().contains("exceeds the allowed 5MB limit"));
     }
 }
