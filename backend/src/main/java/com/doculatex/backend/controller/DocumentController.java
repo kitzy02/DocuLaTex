@@ -3,10 +3,10 @@ package com.doculatex.backend.controller;
 import com.doculatex.backend.dto.LatexResponse;
 import com.doculatex.backend.model.DocumentContent;
 import com.doculatex.backend.service.DocumentService;
+import com.doculatex.backend.service.LatexService; // 1. Added Import
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final LatexService latexService; 
 
     @Operation(
         summary = "Upload a document",
@@ -30,25 +31,24 @@ public class DocumentController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
         }
     )
-    @PostMapping(
-            value = "/upload",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping("/upload")
     public ResponseEntity<LatexResponse> uploadDocument(
-            @RequestPart("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) {
 
-        // 1️⃣ Call service
+        // 1️⃣ Parse the document into our internal model
         DocumentContent content = documentService.parseDocument(file);
 
-        // 2️⃣ Convert to DTO
+        // 2️⃣ Use LatexService to convert model to LaTeX string
+        String latexContent = latexService.generateLatex(content);
+
+        // 3️⃣ Convert to DTO
         LatexResponse response = new LatexResponse(
-                content.toString(),   // Later replace with real LaTeX generator
+                latexContent, 
                 file.getOriginalFilename(),
                 LocalDateTime.now(),
                 "Document parsed successfully"
         );
 
-        // 3️⃣ Return
         return ResponseEntity.ok(response);
     }
 }
