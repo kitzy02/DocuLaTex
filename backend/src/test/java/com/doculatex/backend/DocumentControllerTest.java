@@ -1,4 +1,4 @@
-package com.doculatex.backend;
+package com.doculatex.backend.controller;
 
 import com.doculatex.backend.model.DocumentContent;
 import com.doculatex.backend.service.DocumentService;
