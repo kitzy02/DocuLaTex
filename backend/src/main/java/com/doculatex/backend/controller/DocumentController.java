@@ -42,13 +42,16 @@ public class DocumentController {
         String latexContent = latexService.generateLatex(content);
 
         // 3️⃣ Convert to DTO
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null) {
+            originalFileName = "unknown";
+        }
         LatexResponse response = new LatexResponse(
                 latexContent, 
-                file.getOriginalFilename(),
+                originalFileName,
                 LocalDateTime.now(),
                 "Document parsed successfully"
         );
-
         return ResponseEntity.ok(response);
     }
 }
