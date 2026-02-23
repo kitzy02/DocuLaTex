@@ -1,55 +1,23 @@
 package com.doculatex.backend.parser;
 
-import com.doculatex.backend.exception.DocumentParsingException;
-import com.doculatex.backend.model.DocumentContent;
-import com.doculatex.backend.model.DocumentSection;
-import com.doculatex.backend.model.ParagraphBlock;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.io.InputStream;
+import java.util.List;
 
 @Component
-public class PdfDocumentParser implements DocumentParser {
+@RequiredArgsConstructor
+public class ParserFactory {
 
-    private static final long MAX_SIZE = 5L * 1024 * 1024; // 5MB Limit
+    private final List<DocumentParser> parsers;
 
-    @Override
-    public DocumentContent parse(InputStream inputStream) throws Exception {
-        // Fix: Read MAX_SIZE + 1 to detect if the file exceeds our limit
-        byte[] allBytes = inputStream.readNBytes((int) MAX_SIZE + 1);
-        
-        if (allBytes.length > MAX_SIZE) {
-            throw new DocumentParsingException("PDF exceeds the allowed 5MB limit");
+    public DocumentParser getParser(String fileType) {
+        if (fileType == null || fileType.isBlank()) {
+            throw new IllegalArgumentException("File type is required");
         }
-        
-        // Use try-with-resources to ensure the PDDocument is closed after parsing
-        try (PDDocument pdf = PDDocument.load(allBytes)) {
-            PDFTextStripper stripper = new PDFTextStripper();
-            String text = stripper.getText(pdf);
 
-            DocumentContent doc = new DocumentContent();
-            doc.setTitle("Parsed PDF");
-            DocumentSection main = new DocumentSection("Main Content", 1);
-
-            // Logic for Phase 1: Split into paragraphs by double newlines
-            if (text != null) {
-                String[] chunks = text.split("\\n\\s*\\n");
-                for (String chunk : chunks) {
-                    if (!chunk.trim().isEmpty()) {
-                        main.getContentBlocks().add(new ParagraphBlock(chunk.trim()));
-                    }
-                }
-            }
-            
-            doc.getSections().add(main);
-            return doc;
-        }
-    }
-
-    @Override
-    public boolean supports(String fileType) {
-        return "pdf".equalsIgnoreCase(fileType);
+        return parsers.stream()
+                .filter(parser -> parser.supports(fileType))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported type: " + fileType));
     }
 }
