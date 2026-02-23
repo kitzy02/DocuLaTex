@@ -2,6 +2,7 @@ package com.doculatex.backend.controller;
 
 import com.doculatex.backend.model.DocumentContent;
 import com.doculatex.backend.service.DocumentService;
+import com.doculatex.backend.service.LatexService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +25,21 @@ class DocumentControllerTest {
     @MockBean
     private DocumentService documentService;
 
+    @MockBean
+    private LatexService latexService;
+
     @Test
     void shouldUploadDocumentSuccessfully() throws Exception {
-
+        // Arrange
         DocumentContent mockContent = new DocumentContent();
         mockContent.setTitle("Parsed PDF");
+        String expectedLatex = "\\documentclass{article}\n\\begin{document}\nParsed PDF\n\\end{document}";
 
         Mockito.when(documentService.parseDocument(any()))
                 .thenReturn(mockContent);
+        
+        Mockito.when(latexService.generateLatex(any()))
+                .thenReturn(expectedLatex);
 
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -40,9 +48,11 @@ class DocumentControllerTest {
                 "Dummy content".getBytes()
         );
 
+        // Act & Assert
         mockMvc.perform(multipart("/api/documents/upload")
                         .file(file))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.latexContent").value(expectedLatex))
                 .andExpect(jsonPath("$.originalFileName").value("test.pdf"))
                 .andExpect(jsonPath("$.message")
                         .value("Document parsed successfully"));
