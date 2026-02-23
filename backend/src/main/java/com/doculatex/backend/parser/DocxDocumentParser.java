@@ -14,34 +14,26 @@ public class DocxDocumentParser implements DocumentParser {
 
     @Override
     public DocumentContent parse(InputStream inputStream) throws Exception {
+        // Use try-with-resources to ensure XWPFDocument is closed automatically
+        try (XWPFDocument doc = new XWPFDocument(inputStream)) {
+            DocumentContent document = new DocumentContent();
+            document.setTitle("Parsed DOCX Document");
 
-        XWPFDocument doc = new XWPFDocument(inputStream);
+            DocumentSection currentSection = new DocumentSection("Main", 1);
 
-        DocumentContent document = new DocumentContent();
-        document.setTitle("Parsed DOCX Document");
+            for (XWPFParagraph paragraph : doc.getParagraphs()) {
+                String text = paragraph.getText();
 
-        DocumentSection currentSection =
-                new DocumentSection("Main", 1);
+                if (text == null || text.trim().isEmpty()) {
+                    continue;
+                }
 
-        for (XWPFParagraph paragraph : doc.getParagraphs()) {
-
-            String text = paragraph.getText();
-
-            if (text == null || text.trim().isEmpty()) {
-                continue;
+                currentSection.getContentBlocks()
+                        .add(new ParagraphBlock(text.trim()));
             }
 
-            currentSection.getContentBlocks()
-                    .add(new ParagraphBlock(text.trim()));
+            document.getSections().add(currentSection);
+            return document;
         }
-
-        document.getSections().add(currentSection);
-
-        return document;
-    }
-
-    @Override
-    public boolean supports(String fileType) {
-        return fileType.equalsIgnoreCase("docx");
     }
 }
