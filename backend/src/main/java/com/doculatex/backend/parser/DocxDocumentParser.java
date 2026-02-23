@@ -36,4 +36,11 @@ public class DocxDocumentParser implements DocumentParser {
             return document;
         }
     }
-}
+
+    @Override
+    public boolean supports(String fileType) {
+        return fileType != null && 
+               (fileType.equalsIgnoreCase("docx") || 
+                fileType.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
+    }
+}}
