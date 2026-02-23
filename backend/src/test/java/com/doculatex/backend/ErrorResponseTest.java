@@ -1,5 +1,5 @@
 package com.doculatex.backend;
-import com.doculatex.backend.dto.LatexResponse; 
+import com.doculatex.backend.dto.ErrorResponse; 
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

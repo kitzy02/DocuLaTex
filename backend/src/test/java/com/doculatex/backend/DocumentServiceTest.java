@@ -1,16 +1,13 @@
-package com.doculatex.backend.service;
-
+package com.doculatex.backend;
 import com.doculatex.backend.exception.DocumentParsingException;
 import com.doculatex.backend.model.DocumentContent;
-import com.doculatex.backend.parser.DocumentParser;
-import com.doculatex.backend.parser.ParserFactory;
+import com.doculatex.backend.parser.DocumentParser;  // IMPORT ADDED
+import com.doculatex.backend.parser.ParserFactory;   // IMPORT ADDED
+import com.doculatex.backend.service.DocumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayInputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -34,8 +31,9 @@ class DocumentServiceTest {
 
     @Test
     void shouldThrowExceptionWhenFileIsEmpty() {
+        // Corrected constructor to include a filename, bypassing the name check
         MultipartFile emptyFile =
-                new MockMultipartFile("file", new byte[0]);
+                new MockMultipartFile("file", "test.pdf", "application/pdf", new byte[0]);
 
         assertThrows(DocumentParsingException.class,
                 () -> documentService.parseDocument(emptyFile));
@@ -66,7 +64,6 @@ class DocumentServiceTest {
 
     @Test
     void shouldParseSuccessfully() throws Exception {
-
         MultipartFile file =
                 new MockMultipartFile("file", "test.pdf",
                         "application/pdf", "dummy".getBytes());
@@ -77,8 +74,7 @@ class DocumentServiceTest {
         when(parserFactory.getParser("pdf")).thenReturn(parser);
         when(parser.parse(any())).thenReturn(content);
 
-        DocumentContent result =
-                documentService.parseDocument(file);
+        DocumentContent result = documentService.parseDocument(file);
 
         assertNotNull(result);
         verify(parserFactory, times(1)).getParser("pdf");
@@ -87,7 +83,6 @@ class DocumentServiceTest {
 
     @Test
     void shouldWrapExceptionFromParser() throws Exception {
-
         MultipartFile file =
                 new MockMultipartFile("file", "test.pdf",
                         "application/pdf", "dummy".getBytes());
