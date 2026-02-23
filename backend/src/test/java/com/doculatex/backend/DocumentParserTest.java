@@ -1,4 +1,6 @@
 package com.doculatex.backend;
+import com.doculatex.backend.parser.DocumentParser;
+import com.doculatex.backend.parser.DocxDocumentParser;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

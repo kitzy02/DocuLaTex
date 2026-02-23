@@ -35,9 +35,12 @@ public class DocumentController {
     public ResponseEntity<LatexResponse> uploadDocument(
             @RequestParam("file") MultipartFile file) {
 
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File cannot be null or empty");
+        }
+
         // 1️⃣ Parse the document into our internal model
         DocumentContent content = documentService.parseDocument(file);
-
         // 2️⃣ Use LatexService to convert model to LaTeX string
         String latexContent = latexService.generateLatex(content);
 

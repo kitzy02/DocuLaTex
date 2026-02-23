@@ -3,6 +3,7 @@ package com.doculatex.backend.model;
 import com.doculatex.backend.model.DocumentContent;
 import com.doculatex.backend.model.DocumentSection;
 import com.doculatex.backend.model.ParagraphBlock;
+import com.doculatex.backend.service.LatexService;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class LatexServiceTest {
 
     private final LatexService latexService = new LatexService();
-
     @Test
     void shouldGenerateLatexWithTitle() {
 

@@ -32,8 +32,7 @@ public class DocumentService {
         }
 
         // 2. Extract Extension
-        String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
-
+        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
         // 3. Obtain the stream and parse
         // try-with-resources ensures file.getInputStream() is closed automatically
         try (InputStream inputStream = file.getInputStream()) {

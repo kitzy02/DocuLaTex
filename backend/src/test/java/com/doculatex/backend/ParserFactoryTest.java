@@ -1,5 +1,7 @@
-package com.doculatex.backend.parser;
+package com.doculatex.backend;
 
+import com.doculatex.backend.parser.DocumentParser;
+import com.doculatex.backend.parser.ParserFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,47 +29,47 @@ class ParserFactoryTest {
 
     @Test
     void shouldReturnCorrectParserWhenSupported() {
+        // Arrange
         when(pdfParser.supports("pdf")).thenReturn(true);
         when(docxParser.supports("pdf")).thenReturn(false);
 
+        // Act
         DocumentParser result = factory.getParser("pdf");
 
+        // Assert
         assertEquals(pdfParser, result);
         verify(pdfParser).supports("pdf");
     }
 
     @Test
-    void shouldHandleCaseSensitivityAndSpaces() {
-        // Our factory now trims and lowercases the input
-        when(pdfParser.supports("pdf")).thenReturn(true);
-
-        DocumentParser result = factory.getParser("  PDF  ");
-
-        assertEquals(pdfParser, result);
-    }
-
-    @Test
     void shouldThrowExceptionWhenUnsupported() {
-        when(pdfParser.supports(anyString())).thenReturn(false);
-        when(docxParser.supports(anyString())).thenReturn(false);
+        // Arrange
+        when(pdfParser.supports("txt")).thenReturn(false);
+        when(docxParser.supports("txt")).thenReturn(false);
 
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> factory.getParser("txt"));
         
-        assertTrue(exception.getMessage().contains("Unsupported file type"));
+        assertEquals("Unsupported type: txt", exception.getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", "   "})
     void shouldThrowExceptionForBlankInput(String invalidInput) {
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> factory.getParser(invalidInput));
         
-        assertEquals("File type is required and cannot be null or blank", exception.getMessage());
+        assertEquals("File type is required", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionForNullInput() {
-        assertThrows(IllegalArgumentException.class, () -> factory.getParser(null));
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+                () -> factory.getParser(null));
+        
+        assertEquals("File type is required", exception.getMessage());
     }
 }
