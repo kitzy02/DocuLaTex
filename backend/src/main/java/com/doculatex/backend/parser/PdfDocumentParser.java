@@ -1,5 +1,6 @@
 package com.doculatex.backend.parser;
 
+import com.doculatex.backend.exception.DocumentParsingException;
 import com.doculatex.backend.model.DocumentContent;
 import com.doculatex.backend.model.DocumentSection;
 import com.doculatex.backend.model.ParagraphBlock;
@@ -16,10 +17,14 @@ public class PdfDocumentParser implements DocumentParser {
 
     @Override
     public DocumentContent parse(InputStream inputStream) throws Exception {
-        // Logic for Phase 1: Read safely
-        byte[] allBytes = inputStream.readNBytes((int) MAX_SIZE);
+        // 1. Read MAX_SIZE + 1 to detect if the file exceeds our limit
+        byte[] allBytes = inputStream.readNBytes((int) MAX_SIZE + 1);
         
-        // Changed Loader.loadPDF(allBytes) to PDDocument.load(allBytes) for PDFBox 2.x compatibility
+        if (allBytes.length > MAX_SIZE) {
+            throw new DocumentParsingException("PDF exceeds the allowed 5MB limit");
+        }
+        
+        // 2. Parse the bytes safely using try-with-resources
         try (PDDocument pdf = PDDocument.load(allBytes)) {
             PDFTextStripper stripper = new PDFTextStripper();
             String text = stripper.getText(pdf);
@@ -28,13 +33,16 @@ public class PdfDocumentParser implements DocumentParser {
             doc.setTitle("Parsed PDF");
             DocumentSection main = new DocumentSection("Main Content", 1);
 
-            // Relaxed split: double newline
-            String[] chunks = text.split("\\n\\s*\\n");
-            for (String chunk : chunks) {
-                if (!chunk.trim().isEmpty()) {
-                    main.getContentBlocks().add(new ParagraphBlock(chunk.trim()));
+            // 3. Logic for Phase 1: Split into paragraphs by double newlines
+            if (text != null) {
+                String[] chunks = text.split("\\n\\s*\\n");
+                for (String chunk : chunks) {
+                    if (!chunk.trim().isEmpty()) {
+                        main.getContentBlocks().add(new ParagraphBlock(chunk.trim()));
+                    }
                 }
             }
+            
             doc.getSections().add(main);
             return doc;
         }
