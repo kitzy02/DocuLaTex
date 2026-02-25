@@ -46,11 +46,10 @@ jobs:
       - name: Run SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # Pointing to backend pom and ensuring it looks at the src folder
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dsonar.projectKey=kitzy02_DocuLaTex \
-          -Dsonar.sources=backend/src \
+          -Dsonar.sources=src \
           -f backend/pom.xml
 
   docker:
