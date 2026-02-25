@@ -40,16 +40,17 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build and Run Tests
-        # Correctly points to the backend pom
+        # -f backend/pom.xml sets the context to the backend folder
         run: mvn -B verify -f backend/pom.xml
 
       - name: Run SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # Narrowing sources to src/main/java prevents the "indexed twice" error
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dsonar.projectKey=kitzy02_DocuLaTex \
-          -Dsonar.sources=src \
+          -Dsonar.sources=src/main/java \
           -f backend/pom.xml
 
   docker:
@@ -73,9 +74,8 @@ jobs:
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
         with:
-          # Context is the backend folder
           context: ./backend
-          # Since context is ./backend, the Dockerfile is at the root of that context
+          # Since context is ./backend, the Dockerfile is found directly inside it
           file: ./backend/Dockerfile
           push: true
           tags: kitzy02/doculatex-backend:latest
