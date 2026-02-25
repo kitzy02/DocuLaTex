@@ -1,0 +1,25 @@
+# Build output
+target/
+bin/
+out/
+
+# IDE files (Important to keep the image clean)
+.settings/
+.classpath
+.project
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# Logs and temp files
+*.log
+tmp/
+
+# Docker specific
+Dockerfile
+.dockerignore
+
+# OS generated files
+.DS_Store
+Thumbs.db
